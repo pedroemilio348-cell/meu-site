@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Desafio da Reciclagem — Jogo Educativo de Coleta Seletiva</title>
+  
+  <!-- Meta tags de SEO e PWA mobile -->
+  <meta name="description" content="Aprenda a descartar corretamente diferentes tipos de resíduos no jogo educativo Desafio da Reciclagem. Separe plásticos, papéis, vidros, metais, orgânicos e rejeitos de forma divertida!">
+  <meta name="theme-color" content="#2e7d32">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="author" content="Desafio da Reciclagem">
+  
+  <!-- Favicon Emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
+  
+  <!-- Estilos CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Elementos de Iluminação e Fundo Ambiente -->
+  <div class="bg-ambient-leaves" aria-hidden="true">
+    <div class="ambient-shape ambient-shape-1"></div>
+    <div class="ambient-shape ambient-shape-2"></div>
+    <div class="ambient-shape ambient-shape-3"></div>
+  </div>
+
+  <!-- Toast Flutuante de Feedback Rápido -->
+  <div id="toast-feedback" class="toast-feedback" role="alert" aria-live="assertive"></div>
+
+  <!-- Aplicação Principal -->
+  <main id="app">
+
+    <!-- ====================================================================
+         1. TELA INICIAL (START SCREEN)
+         ==================================================================== -->
+    <section id="start-screen" class="screen start-screen active">
+      <div class="start-container">
+        
+        <div class="hero-badge">
+          <span>♻️</span> Educação Ambiental Divertida
+        </div>
+
+        <h1 class="game-title">
+          DESAFIO DA <span>RECICLAGEM</span>
+        </h1>
+
+        <p class="game-tagline">
+          Você sabe separar o lixo do jeito certo? Arraste cada resíduo até a lixeira correta e torne-se um guardião da natureza!
+        </p>
+
+        <!-- Guia Visual das 6 Lixeiras (CONAMA 275) -->
+        <div class="bin-legend-card">
+          <h2 class="legend-title">Conheça o Código de Cores das Lixeiras</h2>
+          <div class="legend-grid">
+            <div class="legend-item" style="border-top: 4px solid var(--color-organico);">
+              <span class="legend-emoji">🟤</span>
+              <strong class="legend-name" style="color: var(--color-organico);">Orgânico</strong>
+              <span class="legend-desc">Cascas e restos de comida</span>
+            </div>
+            <div class="legend-item" style="border-top: 4px solid var(--color-papel);">
+              <span class="legend-emoji">🔵</span>
+              <strong class="legend-name" style="color: var(--color-papel);">Papel</strong>
+              <span class="legend-desc">Folhas, caixas e jornais</span>
+            </div>
+            <div class="legend-item" style="border-top: 4px solid var(--color-plastico);">
+              <span class="legend-emoji">🔴</span>
+              <strong class="legend-name" style="color: var(--color-plastico);">Plástico</strong>
+              <span class="legend-desc">Garrafas PET e potes</span>
+            </div>
+            <div class="legend-item" style="border-top: 4px solid var(--color-metal);">
+              <span class="legend-emoji">🟡</span>
+              <strong class="legend-name" style="color: var(--color-metal);">Metal</strong>
+              <span class="legend-desc">Latinhas e embalagens</span>
+            </div>
+            <div class="legend-item" style="border-top: 4px solid var(--color-vidro);">
+              <span class="legend-emoji">🟢</span>
+              <strong class="legend-name" style="color: var(--color-vidro);">Vidro</strong>
+              <span class="legend-desc">Garrafas e frascos</span>
+            </div>
+            <div class="legend-item" style="border-top: 4px solid var(--color-rejeito);">
+              <span class="legend-emoji">⚫</span>
+              <strong class="legend-name" style="color: var(--color-rejeito);">Rejeitos</strong>
+              <span class="legend-desc">Papel sanitário e sujeira</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Iniciar -->
+        <div class="action-buttons-group">
+          <button id="btn-start-game" class="btn-primary" type="button">
+            <span>COMEÇAR O DESAFIO</span>
+            <span aria-hidden="true">➔</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         2. TELA DE JOGO (GAMEPLAY SCREEN)
+         ==================================================================== -->
+    <section id="game-screen" class="screen game-screen">
+      <div class="game-container">
+        
+        <!-- Top HUD com Informações de Pontuação e Fase -->
+        <header class="game-hud">
+          <div class="hud-left">
+            <div class="hud-title-wrap">
+              <span class="hud-logo-icon">♻️</span>
+              <span class="hud-brand">Reciclagem</span>
+            </div>
+            <div id="hud-phase-badge" class="phase-pill">Fase 1 — Fácil</div>
+          </div>
+
+          <!-- Placar: Pontos, Acertos, Erros -->
+          <div class="hud-stats">
+            <div class="stat-chip stat-score" title="Sua Pontuação Total">
+              <span>⭐</span>
+              <span class="stat-text"><span class="stat-label">Pontos: </span><strong id="hud-score">0</strong></span>
+            </div>
+            <div class="stat-chip stat-hits" title="Total de Acertos (+10 pontos cada)">
+              <span>✅</span>
+              <span class="stat-text"><span class="stat-label">Acertos: </span><strong id="hud-hits">0</strong></span>
+            </div>
+            <div class="stat-chip stat-errors" title="Total de Erros (-5 pontos cada)">
+              <span>❌</span>
+              <span class="stat-text"><span class="stat-label">Erros: </span><strong id="hud-errors">0</strong></span>
+            </div>
+            <div id="hud-timer-chip" class="stat-chip stat-timer" title="Tempo Restante">
+              <span>⏱️</span>
+              <strong id="hud-timer-val">60s</strong>
+            </div>
+          </div>
+
+          <!-- Ações do HUD (Mudo, Reiniciar) -->
+          <div class="hud-actions">
+            <button id="btn-mute" class="icon-btn" type="button" title="Silenciar som" aria-label="Silenciar som">🔊</button>
+            <button id="btn-restart" class="icon-btn" type="button" title="Reiniciar partida" aria-label="Reiniciar partida">🔄</button>
+          </div>
+        </header>
+
+        <!-- Barra de Progresso da Fase Atual -->
+        <div class="phase-progress-bar" title="Progresso da fase">
+          <div id="phase-progress-fill" class="phase-progress-fill"></div>
+        </div>
+
+        <!-- Área Central com o Objeto a Ser Descartado -->
+        <div class="play-area">
+          <div id="game-instructions" class="drop-instructions">
+            <span>👆</span> Arraste o objeto ou toque nele e depois na lixeira
+          </div>
+
+          <!-- Cartão do Objeto Interativo -->
+          <div id="waste-item-card" class="waste-item-card" draggable="false" tabindex="0" role="button" aria-grabbed="false">
+            <div class="waste-emoji-container">
+              <div id="waste-emoji" class="waste-emoji">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 48C18 52 38 52 50 24C52 19 50 14 47 12C45 11 41 13 40 16C36 28 26 38 14 40C11 41 10 46 12 48Z" fill="#FDD835"/>
+                  <path d="M48 13C46 18 36 34 18 42C14 44 11 46 12 48C14 49 19 49 26 46C38 40 47 28 50 19C51 16 50 13 48 13Z" fill="#FBC02D"/>
+                  <path d="M50 14L54 9C55 8 57 8 57 10L55 15C53 16 51 15 50 14Z" fill="#5D4037"/>
+                  <circle cx="13" cy="46" r="2" fill="#5D4037"/>
+                </svg>
+              </div>
+            </div>
+            <h2 id="waste-name" class="waste-name">Casca de Banana</h2>
+            <span id="waste-hint" class="waste-hint-tag">Resto de fruta natural e biodegradável</span>
+          </div>
+        </div>
+
+        <!-- As 6 Lixeiras na Parte Inferior (Estruturadas Estaticamente para Garantia de Renderização) -->
+        <div id="bins-container" class="bins-container" aria-label="Lixeiras de Coleta Seletiva">
+          <!-- 1. Orgânico -->
+          <div class="bin" data-type="organico" role="button" aria-label="Lixeira Orgânico (Marrom)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Orgânico</div>
+              <div class="bin-sublabel">Marrom</div>
+            </div>
+          </div>
+
+          <!-- 2. Papel -->
+          <div class="bin" data-type="papel" role="button" aria-label="Lixeira Papel (Azul)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Papel</div>
+              <div class="bin-sublabel">Azul</div>
+            </div>
+          </div>
+
+          <!-- 3. Plástico -->
+          <div class="bin" data-type="plastico" role="button" aria-label="Lixeira Plástico (Vermelho)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Plástico</div>
+              <div class="bin-sublabel">Vermelho</div>
+            </div>
+          </div>
+
+          <!-- 4. Metal -->
+          <div class="bin" data-type="metal" role="button" aria-label="Lixeira Metal (Amarelo)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Metal</div>
+              <div class="bin-sublabel">Amarelo</div>
+            </div>
+          </div>
+
+          <!-- 5. Vidro -->
+          <div class="bin" data-type="vidro" role="button" aria-label="Lixeira Vidro (Verde)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Vidro</div>
+              <div class="bin-sublabel">Verde</div>
+            </div>
+          </div>
+
+          <!-- 6. Rejeito -->
+          <div class="bin" data-type="rejeito" role="button" aria-label="Lixeira Rejeitos (Cinza / Preto)" tabindex="0">
+            <div class="bin-lid"><div class="bin-lid-handle"></div></div>
+            <div class="bin-body">
+              <div class="bin-ribs"><span class="bin-rib"></span><span class="bin-rib"></span><span class="bin-rib"></span></div>
+              <div class="bin-recycle-symbol">♻️</div>
+              <div class="bin-label">Rejeito</div>
+              <div class="bin-sublabel">Cinza/Preto</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         3. MODAL EDUCATIVO (PARTE EDUCATIVA DO PRD)
+         ==================================================================== -->
+    <div id="edu-modal-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edu-item-title">
+      <div class="edu-card">
+        <div class="edu-header-glow"></div>
+        
+        <div class="edu-badge-success">
+          <span>Muito bem!</span> <span>♻️</span>
+        </div>
+
+        <div class="edu-item-icon-wrap">
+          <div id="edu-item-icon">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 48C18 52 38 52 50 24C52 19 50 14 47 12C45 11 41 13 40 16C36 28 26 38 14 40C11 41 10 46 12 48Z" fill="#FDD835"/>
+              <path d="M48 13C46 18 36 34 18 42C14 44 11 46 12 48C14 49 19 49 26 46C38 40 47 28 50 19C51 16 50 13 48 13Z" fill="#FBC02D"/>
+              <path d="M50 14L54 9C55 8 57 8 57 10L55 15C53 16 51 15 50 14Z" fill="#5D4037"/>
+              <circle cx="13" cy="46" r="2" fill="#5D4037"/>
+            </svg>
+          </div>
+        </div>
+
+        <h3 id="edu-item-title" class="edu-item-title">Casca de Banana</h3>
+        
+        <div id="edu-bin-destination" class="edu-bin-destination">
+          Lixeira: 🟤 Orgânico (Marrom)
+        </div>
+
+        <p id="edu-explanation" class="edu-explanation">
+          Restos de alimentos são resíduos orgânicos e podem ser destinados à compostagem!
+        </p>
+
+        <div class="edu-curiosity-box">
+          <strong>🌱 Você sabia?</strong>
+          <p id="edu-curiosity-text">Na compostagem, restos de alimentos viram adubo fértil em cerca de 60 a 90 dias.</p>
+        </div>
+
+        <button id="edu-next-btn" class="edu-next-btn" type="button">
+          <span>Próximo Objeto</span>
+          <span>➔</span>
+        </button>
+        <span class="keyboard-shortcut-hint">Pressione [Espaço] ou [Enter] para avançar</span>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         3.1 MODAL DE SUBIDA DE NÍVEL (LEVEL UP)
+         ==================================================================== -->
+    <div id="level-up-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="level-up-title">
+      <div class="edu-card level-up-card">
+        <div class="edu-header-glow"></div>
+        <div class="level-up-banner-badge">🎉 FASE CONCLUÍDA!</div>
+        <div class="level-up-icon">🚀</div>
+        <h3 id="level-up-title" class="edu-item-title" style="color: #2e7d32;">Avançando para o Nível 2!</h3>
+        <p id="level-up-desc" class="edu-explanation">Atenção! Novos materiais desafiadores entraram em cena!</p>
+        <div class="level-up-info-box">
+          <span>Pontuação acumulada: <strong id="level-up-score" style="color: #f57f17;">60</strong> ⭐</span>
+        </div>
+        <button id="level-up-next-btn" class="edu-next-btn" type="button">
+          <span>COMEÇAR NOVO NÍVEL ➔</span>
+        </button>
+      </div>
+    </div>
+
+    <section id="results-screen" class="screen results-screen">
+      <div class="results-card">
+        <div class="trophy-badge">🏆</div>
+        
+        <h2 class="results-title">Desafio Concluído!</h2>
+        <p class="results-subtitle">Parabéns por cuidar do nosso planeta através da reciclagem consciente!</p>
+
+        <div id="result-eco-rank" class="eco-rank-banner">
+          🌟 Mestre da Reciclagem
+        </div>
+
+        <div class="results-stats-grid">
+          <div class="result-stat-box">
+            <span id="result-final-score" class="result-stat-val" style="color: #f57f17;">120</span>
+            <span class="result-stat-lbl">Pontos Totais</span>
+          </div>
+          <div class="result-stat-box">
+            <span id="result-final-hits" class="result-stat-val" style="color: #2e7d32;">12</span>
+            <span class="result-stat-lbl">Acertos</span>
+          </div>
+          <div class="result-stat-box">
+            <span id="result-final-errors" class="result-stat-val" style="color: #c62828;">1</span>
+            <span class="result-stat-lbl">Erros</span>
+          </div>
+        </div>
+
+        <div class="results-stats-grid" style="grid-template-columns: 1fr; margin-bottom: 24px;">
+          <div class="result-stat-box">
+            <span id="result-accuracy" class="result-stat-val" style="color: #1976d2;">92%</span>
+            <span class="result-stat-lbl">Taxa de Precisão</span>
+          </div>
+        </div>
+
+        <button id="btn-play-again" class="btn-primary" type="button">
+          <span>JOGAR NOVAMENTE 🔄</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Scripts do Jogo em Ordem de Dependência -->
+  <script src="confetti.js"></script>
+  <script src="audio.js"></script>
+  <script src="items.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
